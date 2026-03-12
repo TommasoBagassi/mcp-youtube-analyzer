@@ -10,7 +10,7 @@ import tempfile
 
 import yt_dlp
 
-from .utils import format_timestamp, get_yt_dlp_cookie_opts
+from .utils import format_timestamp, get_yt_dlp_cookie_opts, suppress_stdout
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def _download_audio(video_id: str, output_dir: str) -> str:
         **get_yt_dlp_cookie_opts(),
     }
 
-    with yt_dlp.YoutubeDL(opts) as ydl:
+    with suppress_stdout(), yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(
             f"https://www.youtube.com/watch?v={video_id}", download=True
         )

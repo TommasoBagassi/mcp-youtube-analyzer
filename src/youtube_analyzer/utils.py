@@ -2,9 +2,11 @@
 """Shared utilities: URL parsing, auth config, image encoding."""
 
 import base64
+import contextlib
 import io
 import os
 import re
+import sys
 
 from PIL import Image as PILImage
 
@@ -79,6 +81,32 @@ def get_yt_dlp_cookie_opts() -> dict:
 def get_max_duration() -> int:
     """Get maximum allowed video duration in seconds from env."""
     return int(os.environ.get("YOUTUBE_MAX_DURATION", "10800"))
+
+
+@contextlib.contextmanager
+def suppress_stdout():
+    """Redirect fd 1 (stdout) to devnull.
+
+    yt-dlp leaks download progress bars to stdout even with quiet=True.
+    When running as an MCP stdio server, this corrupts the JSON-RPC transport.
+    We operate on the raw file descriptor so it works even when sys.stdout
+    has been replaced by a wrapper (e.g. MCP's own stdio handling).
+    """
+    _STDOUT_FD = 1
+    try:
+        old_fd = os.dup(_STDOUT_FD)
+    except OSError:
+        # fd 1 unavailable (e.g. daemon) — nothing to protect
+        yield
+        return
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, _STDOUT_FD)
+    try:
+        yield
+    finally:
+        os.dup2(old_fd, _STDOUT_FD)
+        os.close(old_fd)
+        os.close(devnull)
 
 
 def encode_image_base64(image: PILImage.Image, quality: int = 60) -> str:

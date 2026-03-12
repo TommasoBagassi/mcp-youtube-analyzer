@@ -16,9 +16,8 @@ from .utils import (
     get_max_duration,
     get_yt_dlp_cookie_opts,
     parse_video_id,
+    suppress_stdout,
 )
-
-logger = logging.getLogger(__name__)
 
 
 def sample_frames(frames: list, max_frames: int) -> list:
@@ -81,7 +80,7 @@ def download_video(video_id: str, output_dir: str, max_resolution: int = 720) ->
         "outtmpl": f"{output_dir}/video.%(ext)s",
     }
 
-    with yt_dlp.YoutubeDL(dl_opts) as ydl:
+    with suppress_stdout(), yt_dlp.YoutubeDL(dl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         return ydl.prepare_filename(info)
 
