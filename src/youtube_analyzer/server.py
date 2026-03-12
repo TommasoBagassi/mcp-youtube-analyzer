@@ -14,7 +14,22 @@ from .video_info import fetch_video_info
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("YouTube Analyzer")
+mcp = FastMCP(
+    "YouTube Analyzer",
+    instructions="""\
+Use these YouTube tools when the user provides a YouTube URL or asks to analyze/summarize/transcribe a video.
+
+Tool selection:
+- get_transcript: When only the spoken content is needed (summaries, quotes, search)
+- extract_frames: When only visuals matter (thumbnails, visual content review)
+- analyze_video: General video analysis — combines transcript + frames interleaved chronologically
+- get_video_info: Quick metadata check (title, duration, channel). Call this first if you need to check duration or metadata before deciding which tool to use.
+
+Tips:
+- For extract_frames and analyze_video on long videos, consider using start_time/end_time to focus on relevant segments
+- For long transcripts, check for next_cursor in the response and paginate if needed
+- When visuals aren't relevant to the question, prefer get_transcript over analyze_video to save context""",
+)
 
 
 @mcp.tool()

@@ -6,6 +6,20 @@ from unittest.mock import patch, MagicMock
 import mcp.types as types
 
 from youtube_analyzer.server import analyze_video
+from youtube_analyzer.server import mcp as mcp_server
+
+
+class TestServerInstructions:
+    def test_server_has_instructions(self):
+        assert mcp_server.instructions is not None
+        assert len(mcp_server.instructions) > 0
+
+    def test_instructions_mention_youtube_tools(self):
+        instructions = mcp_server.instructions
+        assert "get_transcript" in instructions
+        assert "extract_frames" in instructions
+        assert "analyze_video" in instructions
+        assert "get_video_info" in instructions
 
 
 class TestAnalyzeVideoInterleaving:
